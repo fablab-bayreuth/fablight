@@ -10,7 +10,7 @@ SOURCES     = main.cpp \
     bluetoothselector.cpp
 
 # install
-target.path = $$[QT_INSTALL_EXAMPLES]/widgets/widgets/sliders
+target.path = $$PWD/Fablight-Android
 INSTALLS += target
 
 ANDROID_PACKAGE_SOURCE_DIR = $$PWD/android
