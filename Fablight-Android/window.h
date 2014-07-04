@@ -44,6 +44,7 @@
 #include <QWidget>
 #include <QDataStream>
 #include <bluetoothselector.h>
+#include <colorsender.h>
 
 QT_BEGIN_NAMESPACE
 class QCheckBox;
@@ -67,11 +68,9 @@ private:
 
     SlidersGroup *white, *red, *green, *blue;
 
-    QBluetoothSocket *socket;
-    QDataStream stream;
+    ColorSender sender;
 
 private slots:
-    void setSocket(QBluetoothSocket *socket);
     void sendChanges();
 };
 
