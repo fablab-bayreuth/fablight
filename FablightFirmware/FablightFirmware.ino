@@ -83,15 +83,12 @@ void readAction() {
   static int index = 0;
   while(bt.available()) {
     char c = bt.read();
-    bt.write(c);
     if(c == '\r') {
-      bt.write('\n');
       if(index == sizeof(action[0]) * 2) {
-        bt.write(":D\r\n");
         actionIndex++;
-      } else {
-        bt.write(":(\r\n");
       }
+      bt.write('.');
+      Serial.write('.');
       index = 0;
       continue;
     } else {
