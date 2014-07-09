@@ -1,18 +1,7 @@
 #include <SoftwareSerial.h>
-
-#define PIN_W 3
-#define PIN_B 9
-#define PIN_G 10
-#define PIN_R 11
-
-typedef enum {
-  WHITE = 0,
-  RED   = 1,
-  GREEN = 2,
-  BLUE  = 3
-} color_t;
-
-uint8_t colorToPin[4] = { PIN_W, PIN_R, PIN_G, PIN_B };
+#include "global.h"
+#include "LabColor.h"
+#include "PWM.h"
 
 #define BT_KEY 8
 #define BT_RX 13
@@ -21,22 +10,11 @@ uint8_t colorToPin[4] = { PIN_W, PIN_R, PIN_G, PIN_B };
 
 SoftwareSerial bt(BT_TX, BT_RX);
 
+uint8_t colorToPin[4] = { PIN_W, PIN_R, PIN_G, PIN_B };
+
 void setup() {
-  pinMode(PIN_W, OUTPUT);
-  pinMode(PIN_R, OUTPUT);
-  pinMode(PIN_G, OUTPUT);
-  pinMode(PIN_B, OUTPUT);
   
-  TCCR1B &= ~(7 << CS10);
-  TCCR2B &= ~(7 << CS20);
-  
-  TCCR1B |= 1;
-  TCCR2B |= 1;
-  
-  digitalWrite(3, 1);
-  digitalWrite(9, 1);
-  digitalWrite(10, 1);
-  digitalWrite(11, 1);
+  initPWM();
   
   Serial.begin(38400);
   bt.begin(BT_BAUD);
@@ -64,13 +42,13 @@ void doAction() {
     if(action[0].fadeTime == 0 || t >= action[0].fadeTime) {
       doing = 0;
       for(int i = 0; i < 4; i++) {
-        analogWrite(colorToPin[i], 255 - action[0].color[i]);
+        setPWM(i, (uint16_t)action[0].color[i]);
         startColor[i] = action[0].color[i];
       }
       actionIndex = 0;
     } else {
       for(int i = 0; i < 4; i++) {
-        analogWrite(colorToPin[i], 255 - (startColor[i] + ((action[0].color[i] - startColor[i]) * t) / action[0].fadeTime));
+        setPWM(i, (uint16_t)(startColor[i] + ((action[0].color[i] - startColor[i]) * t) / action[0].fadeTime));
       }
     }
   } else if(actionIndex == 1) {
@@ -81,8 +59,10 @@ void doAction() {
 
 void readAction() {
   static int index = 0;
+
   while(bt.available()) {
     char c = bt.read();
+    Serial.write(c);
     if(c == '\r') {
       if(index == sizeof(action[0]) * 2) {
         actionIndex++;
@@ -113,3 +93,4 @@ void readAction() {
     index++;
   }
 }
+
