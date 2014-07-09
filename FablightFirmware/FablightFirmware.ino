@@ -3,12 +3,7 @@
 #include "LabColor.h"
 #include "PWM.h"
 
-#define BT_KEY 8
-#define BT_RX 13
-#define BT_TX 12
-#define BT_BAUD 9600
-
-SoftwareSerial bt(BT_TX, BT_RX);
+SoftwareSerial bt(PIN_BT_TX, PIN_BT_RX);
 
 uint8_t colorToPin[4] = { PIN_W, PIN_R, PIN_G, PIN_B };
 

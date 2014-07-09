@@ -6,6 +6,11 @@
 #define PIN_G 10
 #define PIN_R 11
 
+#define PIN_BT_KEY 8
+#define PIN_BT_RX 13
+#define PIN_BT_TX 12
+#define BT_BAUD 9600
+
 typedef enum {
   WHITE = 0,
   RED   = 1,
