@@ -2,6 +2,7 @@
 #include "global.h"
 #include "LabColor.h"
 #include "PWM.h"
+#include "FablightIR.h"
 
 SoftwareSerial bt(PIN_BT_TX, PIN_BT_RX);
 
