@@ -5,6 +5,7 @@
 #define PIN_B 9
 #define PIN_G 10
 #define PIN_R 11
+#define PIN_IR 5 // Infrared receiver
 
 typedef enum {
   WHITE = 0,
@@ -14,4 +15,4 @@ typedef enum {
 } color_t;
 
 extern uint8_t colorToPin[4];
-#endif
+#endif // GLOBAL_H
