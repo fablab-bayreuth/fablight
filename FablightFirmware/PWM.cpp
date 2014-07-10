@@ -4,7 +4,16 @@
 #include <stdint.h>
 #include "PWM.h"
 
-static uint16_t timer1[2] = {1,1};
+static uint16_t timer1[2] = {0,0};
+static uint16_t timer2[2] = {0,0};
+static struct {
+	uint8_t duty12[2];
+	uint8_t duty4[2];
+	uint8_t lag[2];
+} timer2_state;
+static uint8_t timer2ctr = 0;
+static uint8_t timer2cmpa = 0, timer2cmpb = 0;
+
 void setTimer1PWM() {
 	/* Timer 1: Pins 9 and 10.
 	 * Uses CTC mode and a 12 bit timer.
@@ -27,14 +36,7 @@ void setTimer1PWM() {
 	TCCR1A |= (1<<WGM11); 
 	TIMSK1 |= (1<<TOIE1);
 }
-static uint16_t timer2[2] = {1,1};
-static struct {
-	uint8_t duty12[2];
-	uint8_t duty4[2];
-	uint8_t lag[2];
-} timer2_state;
-static uint8_t timer2ctr = 0;
-static uint8_t timer2cmpa = 0, timer2cmpb = 0;
+
 void setTimer2PWM() {
 	/* Timer 2: Pins 3 and 11
 	 * If one of the PWM values is <64, the overflow ISR will use an
