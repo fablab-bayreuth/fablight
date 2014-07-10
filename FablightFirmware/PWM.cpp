@@ -5,11 +5,18 @@
 #include "PWM.h"
 
 static uint16_t timer1[2] = {0,0};
+static uint16_t timer2[2] = {0,0};
+static struct {
+	uint8_t duty12[2];
+	uint8_t duty4[2];
+	uint8_t lag[2];
+} timer2_state;
+static uint8_t timer2ctr = 0;
+static uint8_t timer2cmpa = 0, timer2cmpb = 0;
+
 void setTimer1PWM() {
 	/* Timer 1: Pins 9 and 10.
-	 * If values are small (<10), use CTC mode and a 12 bit timer.
-	 * If values are <20, use a 10-bit fast PWM.
-	 * Else, use an 8-bit fast PWM.
+	 * Uses CTC mode and a 12 bit timer.
 	 */
   
 	TCCR1A = 0;
@@ -29,17 +36,11 @@ void setTimer1PWM() {
 	TCCR1A |= (1<<WGM11); 
 	TIMSK1 |= (1<<TOIE1);
 }
-static uint16_t timer2[2] = {0,0};
-static struct {
-	uint8_t duty12[2];
-	uint8_t duty4[2];
-	uint8_t lag[2];
-} timer2_state;
-static uint8_t timer2ctr = 0;
-static uint8_t timer2cmpa = 0, timer2cmpb = 0;
+
 void setTimer2PWM() {
 	/* Timer 2: Pins 3 and 11
-	 * If values are <20, the overflow ISR uses an additional counter (4 bits) to switch between two OCR values
+	 * If one of the PWM values is <64, the overflow ISR will use an
+	 * additional counter (4 bits) to switch between two OCR values
 	 */
    
 	// Disable the overflow interrupt first
@@ -99,6 +100,15 @@ void setPWM(uint8_t color, uint16_t value) {
 	}
 }
 
+void setPWMs(uint16_t white, uint16_t red, uint16_t green, uint16_t blue) {
+	timer1[0] = blue;
+	timer1[1] = green;
+	timer2[0] = red;
+	timer2[1] = white;
+	setTimer1PWM();
+	setTimer2PWM();
+}
+
 void initPWM() {
 	pinMode(PIN_W, OUTPUT);
 	pinMode(PIN_R, OUTPUT);
@@ -112,10 +122,6 @@ void initPWM() {
   
 	setTimer1PWM();
 	setTimer2PWM();
-
-	DDRD |= 0x80;
-	PORTD |= 0x80;
-	PORTD &= ~0x7F;
 }
 
 ISR(TIMER2_OVF_vect) {
