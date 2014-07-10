@@ -100,6 +100,15 @@ void setPWM(uint8_t color, uint16_t value) {
 	}
 }
 
+void setPWMs(uint16_t white, uint16_t red, uint16_t green, uint16_t blue) {
+	timer1[0] = blue;
+	timer1[1] = green;
+	timer2[0] = red;
+	timer2[1] = white;
+	setTimer1PWM();
+	setTimer2PWM();
+}
+
 void initPWM() {
 	pinMode(PIN_W, OUTPUT);
 	pinMode(PIN_R, OUTPUT);
