@@ -1,6 +1,7 @@
 
+#include "Arduino.h"
 #include "global.h"
-#include "FablightIR.cpp"
+#include "FablightIR.h"
 
 //---------------------------------------------------------------------------------
 
@@ -9,15 +10,15 @@
 #include "IRremote0.h"
 
 // Keep this private
-static IRrecv irrecv(PIN_IR);
+static IRrecv0 irrecv(PIN_IR);
 static decode_results results;
 
 //---------------------------------------------------------------------------------
 
 
-uint8_t byte fablight_ir_decode_button(unsigned long code, enum fablight_ir_type ir_type = CARMP3)
+uint8_t fablight_ir_decode_button(unsigned long code, enum fablight_ir_type ir_type = CARMP3)
 {
-  static byte last_button = 0;
+  static uint8_t last_button = 0;
   if (code==0)
   {
     last_button = 0;
@@ -79,13 +80,15 @@ void fablight_ir_init(void)
 
 // Get the number of the last pressed button (0 for none or error).
 // This queries the last IR code from the IR reciever class and decodes the button.
-uint8_t fablight_ir_get_button(unsigned long code, enum fablight_ir_type ir_type = CARMP3)
+uint8_t fablight_ir_get_button(enum fablight_ir_type ir_type)
 {
-	unit8_t button = 0;
+	uint8_t button = 0;
   	if (irrecv.decode(&results)) {
-		button = fablight_ir_decode_button(results.value);
+                button = fablight_ir_decode_button(results.value);
+                Serial.print("IR button=");
+                Serial.println(button);
+                irrecv.resume();
 	}
-	irrecv.resume();
 	return button;
 }
 

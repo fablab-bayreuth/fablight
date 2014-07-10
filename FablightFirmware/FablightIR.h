@@ -12,8 +12,8 @@ enum fablight_ir_type {
 void fablight_ir_init(void);
 
 // Get the number of the last pressed button (0 for none or error)
-uint8_t fablight_ir_get_button(unsigned long code, enum fablight_ir_type ir_type = CARMP3);
+uint8_t fablight_ir_get_button(enum fablight_ir_type ir_type = CARMP3);
 
 
-#endif FABLIGHT_IR_H
+#endif // FABLIGHT_IR_H
 

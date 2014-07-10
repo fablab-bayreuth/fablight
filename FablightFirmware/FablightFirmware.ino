@@ -10,9 +10,13 @@ uint8_t colorToPin[4] = { PIN_W, PIN_R, PIN_G, PIN_B };
 
 void setup() {
 	initPWM();
-  
+        fablight_ir_init();
 	Serial.begin(38400);
-	bt.begin(BT_BAUD);
+        bt.begin(BT_BAUD);
+        setPWM(RED, 0);
+        setPWM(GREEN, 0);
+        setPWM(BLUE, 0);
+        setPWM(WHITE, 0);
 }
 
 unsigned long startTime = 0;
@@ -20,14 +24,17 @@ uint8_t startColor[4] = { 0, 0, 0, 0 };
 
 struct action {
 	uint16_t fadeTime;
-	uint8_t color[4];
+	int16_t color[4];
+        unsigned relative: 1;
 } action[2];
 
 int8_t actionIndex = 0;
 
 void loop() {
-	readAction();
+	handle_bluetooth();
+        handle_ir();
 	doAction();
+        
 }
 
 void doAction() {
@@ -53,12 +60,17 @@ void doAction() {
 			}
 		}
 	} else if(actionIndex == 1) {
+                if (action[0].relative) { // Relative change: Calculate new absolute before starting action
+                    for(uint8_t i = 0; i < 4; i++) {
+		        action[0].color[i] += startColor[i];
+		    }
+                }
 		startTime = millis();
 		doing = 1;
 	}
 }
 
-void readAction() {
+void handle_bluetooth() {
 	static int index = 0;
 
 	while(bt.available()) {
@@ -92,4 +104,32 @@ void readAction() {
 		index++;
 	}
 }
+
+
+void handle_ir(void)
+{
+    uint8_t button = fablight_ir_get_button();
+    if (button==0) return;
+    switch (button) {
+      case 11:
+        action[actionIndex].fadeTime = 0;
+        action[actionIndex].color[RED] = 0;
+        action[actionIndex].color[GREEN] = 0;
+        action[actionIndex].color[BLUE] = 0;
+        action[actionIndex].color[WHITE] = 10;
+        actionIndex |= 1;
+        break;
+      case 21:
+        action[actionIndex].fadeTime = 0;
+        action[actionIndex].color[RED] = 0;
+        action[actionIndex].color[GREEN] = 0;
+        action[actionIndex].color[BLUE] = 0;
+        action[actionIndex].color[WHITE] = 0;
+        actionIndex |= 1;
+        break;
+    }
+    
+}
+
+
 

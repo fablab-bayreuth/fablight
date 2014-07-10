@@ -5,7 +5,7 @@
 #define PIN_B 9
 #define PIN_G 10
 #define PIN_R 11
-#define PIN_IR 5 // Infrared receiver
+#define PIN_IR 2 // Infrared receiver
 
 #define PIN_BT_KEY 8
 #define PIN_BT_RX 13

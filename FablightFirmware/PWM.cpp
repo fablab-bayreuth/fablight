@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "PWM.h"
 
-static uint16_t timer1[2] = {1,1};
+static uint16_t timer1[2] = {0,0};
 void setTimer1PWM() {
 	/* Timer 1: Pins 9 and 10.
 	 * If values are small (<10), use CTC mode and a 12 bit timer.
@@ -29,7 +29,7 @@ void setTimer1PWM() {
 	TCCR1A |= (1<<WGM11); 
 	TIMSK1 |= (1<<TOIE1);
 }
-static uint16_t timer2[2] = {1,1};
+static uint16_t timer2[2] = {0,0};
 static struct {
 	uint8_t duty12[2];
 	uint8_t duty4[2];
@@ -73,9 +73,6 @@ void setTimer2PWM() {
 		timer2_state.lag   [1] = 0;
 		TIMSK2 |= (1<<TOIE2);
 	}
-	Serial.println(timer2_state.duty12[0]);
-	Serial.println(timer2_state.duty4[0]);
-	Serial.println();
 }
 
 void setPWM(uint8_t color, uint16_t value) {

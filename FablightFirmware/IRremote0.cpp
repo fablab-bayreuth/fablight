@@ -126,11 +126,11 @@ void IRrecv0::blink13(int blinkflag)
 ISR(TIMER_INTR_NAME)
 {
   static byte tog = 0;
-  digitalWrite(12, (tog++)&1);
-
+  //digitalWrite(7, 1); digitalWrite(7, 0); // test timing
+  
   TIMER_RESET;
-  OCR0A += 12 + (tog & 1);
-
+  OCR0A += 12 + ((tog++) & 1);
+  
   uint8_t irdata = (uint8_t)digitalRead(irparams.recvpin);
 
   irparams.timer++; // One more 50us tick
