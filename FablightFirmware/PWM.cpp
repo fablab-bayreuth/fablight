@@ -7,9 +7,7 @@
 static uint16_t timer1[2] = {1,1};
 void setTimer1PWM() {
 	/* Timer 1: Pins 9 and 10.
-	 * If values are small (<10), use CTC mode and a 12 bit timer.
-	 * If values are <20, use a 10-bit fast PWM.
-	 * Else, use an 8-bit fast PWM.
+	 * Uses CTC mode and a 12 bit timer.
 	 */
   
 	TCCR1A = 0;
@@ -39,7 +37,8 @@ static uint8_t timer2ctr = 0;
 static uint8_t timer2cmpa = 0, timer2cmpb = 0;
 void setTimer2PWM() {
 	/* Timer 2: Pins 3 and 11
-	 * If values are <20, the overflow ISR uses an additional counter (4 bits) to switch between two OCR values
+	 * If one of the PWM values is <64, the overflow ISR will use an
+	 * additional counter (4 bits) to switch between two OCR values
 	 */
    
 	// Disable the overflow interrupt first
@@ -73,9 +72,6 @@ void setTimer2PWM() {
 		timer2_state.lag   [1] = 0;
 		TIMSK2 |= (1<<TOIE2);
 	}
-	Serial.println(timer2_state.duty12[0]);
-	Serial.println(timer2_state.duty4[0]);
-	Serial.println();
 }
 
 void setPWM(uint8_t color, uint16_t value) {
