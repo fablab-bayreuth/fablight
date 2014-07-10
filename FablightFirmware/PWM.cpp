@@ -113,10 +113,6 @@ void initPWM() {
   
 	setTimer1PWM();
 	setTimer2PWM();
-
-	DDRD |= 0x80;
-	PORTD |= 0x80;
-	PORTD &= ~0x7F;
 }
 
 ISR(TIMER2_OVF_vect) {
