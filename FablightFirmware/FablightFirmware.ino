@@ -1,6 +1,6 @@
 #include <SoftwareSerial.h>
 #include "global.h"
-#include "LabColor.h"
+#include "ColorSpaces.h"
 #include "PWM.h"
 #include "FablightIR.h"
 

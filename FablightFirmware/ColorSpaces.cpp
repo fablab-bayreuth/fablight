@@ -1,4 +1,4 @@
-#include "LabColor.h"
+#include "ColorSpaces.h"
 #include "global.h"
 
 void rgb_to_hsv( int16_t red, int16_t green, int16_t blue, int16_t *hue, int16_t *sat, int16_t *val )
