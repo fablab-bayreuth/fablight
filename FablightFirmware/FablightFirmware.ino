@@ -10,13 +10,14 @@ uint8_t colorToPin[4] = { PIN_W, PIN_R, PIN_G, PIN_B };
 
 void setup() {
 	initPWM();
-        fablight_ir_init();
+	fablight_ir_init();
 	Serial.begin(38400);
-        bt.begin(BT_BAUD);
-        setPWM(RED, 0);
-        setPWM(GREEN, 0);
-        setPWM(BLUE, 0);
-        setPWM(WHITE, 0);
+	bt.begin(BT_BAUD);
+	
+	setPWM(RED, 0);
+	setPWM(GREEN, 0);
+	setPWM(BLUE, 0);
+	setPWM(WHITE, 0);
 }
 
 unsigned long startTime = 0;
@@ -34,7 +35,6 @@ void loop() {
 	handle_bluetooth();
 	handle_ir();
 	doAction();
-        
 }
 
 void doAction() {
@@ -47,6 +47,7 @@ void doAction() {
 				setPWM(i, (uint16_t)action[0].color[i]);
 				startColor[i] = action[0].color[i];
 			}
+			action[0] = action[1];
 			actionIndex = 0;
 		} else {
 			for(uint8_t i = 0; i < 4; i++) {
@@ -60,11 +61,11 @@ void doAction() {
 			}
 		}
 	} else if(actionIndex == 1) {
-                if (action[0].relative) { // Relative change: Calculate new absolute before starting action
-                    for(uint8_t i = 0; i < 4; i++) {
+		if (action[0].relative) { // Relative change: Calculate new absolute before starting action
+			for(uint8_t i = 0; i < 4; i++) {
 		        action[0].color[i] += startColor[i];
 		    }
-                }
+		}
 		startTime = millis();
 		doing = 1;
 	}
@@ -75,10 +76,12 @@ void handle_bluetooth() {
 
 	while(bt.available()) {
 		char c = bt.read();
+		Serial.write(c);
 		if(c == '\r') {
-			if(index == sizeof(action[0]) * 2) {
-				actionIndex++;
+			if(index == 12) {
+				actionIndex |= 1;
 			}
+			Serial.write('\n');
 			bt.write('.');
 			index = 0;
 			continue;
@@ -97,9 +100,9 @@ void handle_bluetooth() {
 		case 2: action[actionIndex].fadeTime |= c <<  4; break;
 		case 3: action[actionIndex].fadeTime |= c; break;
 		case 4: case 6: case 8: case 10:
-			action[actionIndex].color[index/2 - 2] =  c << 4; break;
+			action[actionIndex].color[index/2 - 2] =  c << 8; break;
 		case 5: case 7: case 9: case 11:
-			action[actionIndex].color[index/2 - 2] |= c; break;
+			action[actionIndex].color[index/2 - 2] |= c << 4; break;
 		}
 		index++;
 	}
