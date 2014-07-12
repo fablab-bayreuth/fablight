@@ -32,7 +32,7 @@ int8_t actionIndex = 0;
 
 void loop() {
 	handle_bluetooth();
-        handle_ir();
+	handle_ir();
 	doAction();
         
 }
