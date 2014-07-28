@@ -54,36 +54,37 @@ void setTimer2PWM() {
     // phase-correct PWM
     TCCR2A = (1<<WGM21) | (1<<WGM20);
 
-    // Update SDM state __in any case__
+    OCR2A = (timer2[0] >> 4);
+    if(timer2[0] > 0) {
+        // Inverting mode
+        TCCR2A |= (1<<COM2A1) | (1<<COM2A0);
+    } 
+    else {
+        PORTB |= (1<<3);
+    }
+
+    OCR2B = (timer2[1] >> 4);
+    if(timer2[1] > 0) {
+        // Inverting mode
+        TCCR2A |= (1<<COM2B1) | (1<<COM2B0);    
+    } 
+    else {
+        PORTD |= (1<<3);
+    }
+
+    // Update SDM state 
     timer2_state.duty12[0] = (timer2[0] >> 4);
     timer2_state.duty4 [0] = (timer2[0]     ) & 0x0F;
     timer2_state.lag   [0] = 0;
     timer2_state.duty12[1] = (timer2[1] >> 4);
     timer2_state.duty4 [1] = (timer2[1]     ) & 0x0F;
     timer2_state.lag   [1] = 0;
-
-    if(timer2[0] > 0) {
-        // Inverting mode
-        TCCR2A |= (1<<COM2A1) | (1<<COM2A0);
-        OCR2A = timer2_state.duty12[0];
-    } 
-    else {
-        PORTB |= (1<<3);
-    }
-
-    if(timer2[1] > 0) {
-        // Inverting mode
-        TCCR2A |= (1<<COM2B1) | (1<<COM2B0);
-        OCR2B = timer2_state.duty12[1]; 
-    } 
-    else {
-        PORTD |= (1<<3);
-    }
-
-    // Enable timer 2 overflow interrupt if SDM is used
+    
+    // Enable timer 2 overflow interrupt
     if((timer2[0] > 0 && timer2[0] < 64) || (timer2[1] > 0 && timer2[1] < 64)) {
         TIMSK2 |= (1<<TOIE2);
     }
+    TIMSK2 |= (1<<TOIE2);
 }
 
 void setPWM(uint8_t color, uint16_t value) {
