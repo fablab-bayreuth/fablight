@@ -6,8 +6,6 @@
 
 SoftwareSerial bt(PIN_BT_TX, PIN_BT_RX);
 
-uint8_t colorToPin[4] = { PIN_W, PIN_R, PIN_G, PIN_B };
-
 void setup() {
 	initPWM();
 	fablight_ir_init();
