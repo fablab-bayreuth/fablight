@@ -130,8 +130,9 @@ void handle_bluetooth() {
 void handle_ir(void)
 {
     uint8_t button = fablight_ir_get_button();
-    const float ir_fact = 1.2;
+    const float ir_fact = 1.05;
     if (button==0) return;
+    Serial.print("Via infrared: button "); Serial.print(button); Serial.print("\n");
     switch (button) {
         case 11:  setPWMs( 0, 0, 0, 0 ); break;
         case 12:  setPWMs( 1, 1, 1, 1 ); break;
