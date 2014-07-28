@@ -136,19 +136,19 @@ void applyTimer2PWM(void) {
 void setPWM(uint8_t color, uint16_t value) {
     uint8_t pin = colorToPin[color];
     switch(pin) {
-    case 3:
+    case 3: // white
         timer2B = value;
         applyTimer2PWM();
         break;
-    case 9:
+    case 9: // blue
         timer1A = value;
         applyTimer1PWM();
         break;
-    case 10:
+    case 10: // green
         timer1B = value;
         applyTimer1PWM();
         break;
-    case 11:
+    case 11: // red
         timer2A = value;
         applyTimer2PWM();
         break;
@@ -161,32 +161,32 @@ void setPWM_rel(uint8_t color, int16_t diff) {
     uint8_t pin = colorToPin[color];
     int16_t t = 0;
     switch(pin) {
-    case 3:
+    case 3: // white
         t = timer2B + diff;
         if (t<0) t=0;
         if (t>0xfff) t=0xfff;
         timer2B = t;
         applyTimer2PWM();
         break;
-    case 9:
+    case 9: // blue
         t = timer1A + diff;
         if (t<0) t=0;
         if (t>0xfff) t=0xfff;
         timer1A = t;
         applyTimer1PWM();
         break;
-    case 10:
+    case 10: // green
         t = timer1B + diff;
         if (t<0) t=0;
         if (t>0xfff) t=0xfff;
         timer1A = t;
         applyTimer1PWM();
         break;
-    case 11:
+    case 11: // red
         t = timer2A + diff;
         if (t<0) t=0;
         if (t>0xfff) t=0xfff;
-        timer1A = t;
+        timer2A = t;
         applyTimer2PWM();
         break;
     }
@@ -196,8 +196,6 @@ void setPWM_rel(uint8_t color, int16_t diff) {
 
 void setPWMs(uint16_t white, uint16_t red, uint16_t green, uint16_t blue)
 {
-    Serial.print("White: ");
-    Serial.println(white);
     timer1A = blue;
     timer1B = green;
     timer2A = red;
@@ -275,7 +273,7 @@ void set_red_rel(int16_t diff)
 
 void set_green_rel(int16_t diff)
 {
-    int16_t t = timer2B + diff;
+    int16_t t = timer1B + diff;
     if (t < 0) t = 0;
     if (t > 0xfff) t = 0xfff;
     timer1B = t;

@@ -12,6 +12,11 @@ void set_green_rel(int16_t diff);
 void set_blue_rel(int16_t diff);
 void set_white_rel(int16_t diff);
 
+uint16_t get_red(void);
+uint16_t get_green(void);
+uint16_t get_blue(void);
+uint16_t get_white(void);
+
 void setPWM(uint8_t color, uint16_t value);
 void setPWM_rel(uint8_t color, int16_t diff);
 void setPWMs(uint16_t white, uint16_t red, uint16_t green, uint16_t blue);
