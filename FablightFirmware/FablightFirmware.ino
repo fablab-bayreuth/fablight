@@ -29,8 +29,55 @@ void loop() {
 
 
 //-------------------------------------------------------------------------
+// Bluetooth receive handler
+// Bluetooth command format: "%04x%02x%02x%02x%02x", fadeTime, white, ref, green, blue
+void handle_bluetooth() 
+{
+    static uint8_t index=0, err=0;
+    static uint16_t  red=0, green=0, blue=0, white=0;
 
+    while(bluetooth.available()) {
+        char c = bluetooth.read();
+        Serial.write(c);
+        if(c == '\r' || c == '\n') { // line ending terminates command 
+            Serial.write('\n');
+            bluetooth.write('.');        
+            if (!err && index==12)
+                setPWMs(white, red, green, blue);
+            index = 0;
+            err = 0;
+            continue;
+        } else if (err || index > 12) {
+            err = 1;
+            continue;    
+        } else { // hex ascii to integer
+            if (c >= '0' && c <= '9') {
+                c -= '0'; 
+            } else if (c >= 'A' && c <= 'F') {
+                c -= 'A' - 10;
+            } else {
+                err = 1;
+                continue;
+            }
+            switch(index++) {
+                case 0: case 1: case 2: case 3: break;
+                case 4: white = c<<8; break;
+                case 5: white |= c<<4; break;
+                case 6: red = c<<8; break;
+                case 7: red |= c<<4; break;
+                case 8: green = c<<8; break;
+                case 9: green |= c<<4; break;
+                case 10: blue = c<<8; break;
+                case 11: blue |= c<<4; break;
+                default: err = 1; break;
+            }
+        }
+    }
+}
 
+//--------------------------------------------------------------------------------
+
+/*
 // bluetooth handler with fade action
 void handle_bluetooth() {
  	static int index = 0;
@@ -68,7 +115,7 @@ void handle_bluetooth() {
  		index++;
  	}
  }
- 
+ */
 
 //-------------------------------------------------------------------------
 
