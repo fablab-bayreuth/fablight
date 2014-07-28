@@ -13,10 +13,12 @@ void applyTimer1PWM(void);
 void applyTimer2PWM(void);
 
 // Private data
-static uint16_t timer1A = 0,  // pwm duty cycles timer1/2 channels A/B
-timer1B = 0,
-timer2A = 0,
-timer2B = 0;
+static uint16_t   // pwm duty cycles 
+    timer1A = 0,  // blue
+    timer1B = 0,  // green
+    timer2A = 0,  // red
+    timer2B = 0;  // white  
+    
 static struct {           // modulator states for timer 2
     uint8_t duty12;  // duty cycles bits <12:4>
     uint8_t duty4;   // duty cacles bits <3:0>
@@ -235,7 +237,7 @@ void setPWMs_rel(int16_t white, int16_t red, int16_t green, int16_t blue)
 }
 
 //---------------------------------------------------------------------
-
+// Single color setters
 void set_red(uint16_t value)
 {
     timer2A = value;
@@ -261,6 +263,15 @@ void set_white(uint16_t value)
 }
 
 //---------------------------------------------------------------------
+// Single color getters
+
+uint16_t get_red(void) { return timer2A; }
+uint16_t get_green(void) { return timer1B; }
+uint16_t get_blue(void) { return timer1A; }
+uint16_t get_white(void) { return timer2B; }
+
+//---------------------------------------------------------------------
+// Relative (additive) setters 
 
 void set_red_rel(int16_t diff)
 {
@@ -292,6 +303,58 @@ void set_blue_rel(int16_t diff)
 void set_white_rel(int16_t diff)
 {
     int16_t t = timer2B + diff;
+    if (t < 0) t = 0;
+    if (t > 0xfff) t = 0xfff;
+    timer2B = t;
+    applyTimer2PWM();
+}
+
+//---------------------------------------------------------------------
+// Relative (by factor) setters
+// Minimum change is +/- 1
+
+void set_red_fact(float fact)
+{
+    int16_t  t = timer2A * fact;
+    if (t == timer2A)
+        if (fact > 1.) t++;
+        else if (fact < 1.) t--;
+    if (t < 0) t = 0;
+    if (t > 0xfff) t = 0xfff;
+    timer2A = t;
+    applyTimer2PWM();
+}
+
+void set_green_fact(float fact)
+{
+    int16_t  t = timer1B * fact;
+    if (t == timer1B)
+        if (fact > 1.) t++;
+        else if (fact < 1.) t--;
+    if (t < 0) t = 0;
+    if (t > 0xfff) t = 0xfff;
+    timer1B = t;
+    applyTimer1PWM();
+}
+
+void set_blue_fact(float fact)
+{
+    int16_t t = timer1A * fact;
+    if (t == timer1A)
+        if (fact > 1.) t++;
+        else if (fact < 1.) t--;
+    if (t < 0) t = 0;
+    if (t > 0xfff) t = 0xfff;
+    timer1A = t;
+    applyTimer1PWM();
+}
+
+void set_white_fact(float fact)
+{
+    int16_t t = timer2B * fact;
+    if (t == timer2B)
+        if (fact > 1.) t++;
+        else if (fact < 1.) t--;
     if (t < 0) t = 0;
     if (t > 0xfff) t = 0xfff;
     timer2B = t;

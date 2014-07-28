@@ -130,19 +130,20 @@ void handle_bluetooth() {
 void handle_ir(void)
 {
     uint8_t button = fablight_ir_get_button();
+    const float ir_fact = 1.2;
     if (button==0) return;
     switch (button) {
-    case 11:  setPWMs( 0, 0, 0, 0 ); break;
-    case 12:  setPWMs( 1, 1, 1, 1 ); break;
-    case 13:  setPWMs( 50, 50, 50, 50 ); break;
-    case 21:  set_red_rel( -1 ); break;
-    case 22:  set_red_rel( +1 ); break; 
-    case 31:  set_green_rel( -1 ); break;
-    case 32:  set_green_rel( +1 ); break;
-    case 41:  set_blue_rel( -1 ); break;
-    case 42:  set_blue_rel( +1 ); break;
-    case 51:  set_white_rel( -1 ); break;
-    case 52:  set_white_rel( +1 ); break;
+        case 11:  setPWMs( 0, 0, 0, 0 ); break;
+        case 12:  setPWMs( 1, 1, 1, 1 ); break;
+        case 13:  setPWMs( 50, 50, 50, 50 ); break;
+        case 21:  set_red_fact( 1./ir_fact ); break;
+        case 22:  set_red_fact( ir_fact ); break; 
+        case 31:  set_green_fact( 1./ir_fact ); break;
+        case 32:  set_green_fact( ir_fact ); break;
+        case 41:  set_blue_fact( 1./ir_fact ); break;
+        case 42:  set_blue_fact( ir_fact ); break;
+        case 51:  set_white_fact( 1./ir_fact ); break;
+        case 52:  set_white_fact( ir_fact ); break;
     }
 }
 
