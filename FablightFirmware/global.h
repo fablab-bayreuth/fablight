@@ -1,5 +1,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
+
 #include <stdint.h>
 #define PIN_W 3
 #define PIN_B 9
@@ -20,4 +21,5 @@ typedef enum {
 } color_t;
 
 extern uint8_t colorToPin[4];
+
 #endif // GLOBAL_H
