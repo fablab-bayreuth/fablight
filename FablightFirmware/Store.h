@@ -3,16 +3,15 @@
 // 16 bytes per slot: RGBW state (8byte), 8 unused bytes. The Arduino Uno has 
 // 1024 bytes of Eeeprom memory, so there are 64 possible slots.
 
+
 #ifndef STORE_H
 #define STORE_H
 
 #include <EEPROM.h>
 #include <stdint.h>
 
-// Number of storage slots
-#define STORE_MAX (1024/16-1)
+#define SLOT_MAX (1024/16-1)
 
-// Storage data struct
 #pragma pack(1)
 struct Savegame {
     uint16_t red;
