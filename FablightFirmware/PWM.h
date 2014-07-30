@@ -29,8 +29,8 @@ uint16_t get_white(void);
 
 void setPWM(uint8_t color, uint16_t value);
 void setPWM_rel(uint8_t color, int16_t diff);
-void setPWMs(uint16_t white, uint16_t red, uint16_t green, uint16_t blue);
-void setPWMs_rel(int16_t white, int16_t red, int16_t green, int16_t blue);
+void setPWMs(uint16_t red, uint16_t green, uint16_t blue, uint16_t white);
+void setPWMs_rel(int16_t red, int16_t green, int16_t blue, uint16_t white);
 void initPWM();
 
 #endif

@@ -85,8 +85,8 @@ uint8_t fablight_ir_get_button(enum fablight_ir_type ir_type)
 	uint8_t button = 0;
   	if (irrecv.decode(&results)) {
                 button = fablight_ir_decode_button(results.value);
-                Serial.print("IR button=");
-                Serial.println(button);
+                //Serial.print("IR button=");
+                //Serial.println(button);
                 irrecv.resume();
 	}
 	return button;

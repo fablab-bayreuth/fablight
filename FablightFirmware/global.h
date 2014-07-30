@@ -2,6 +2,7 @@
 #define GLOBAL_H
 
 #include <stdint.h>
+
 #define PIN_W 3
 #define PIN_B 9
 #define PIN_G 10

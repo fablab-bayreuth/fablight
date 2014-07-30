@@ -1,11 +1,14 @@
 
 #include <SoftwareSerial.h>
+#include <EEPROM.h> // needs to be included here to be accessible
 
 #include "global.h"
 #include "ColorSpaces.h"
 #include "PWM.h"
 #include "FablightIR.h"
 #include "Fade.h"
+#include "Store.h"
+#include "FablightUtil.h"
 
 SoftwareSerial bluetooth(PIN_BT_TX, PIN_BT_RX);
 
@@ -135,8 +138,13 @@ void handle_ir(void)
     Serial.print("Via infrared: button "); Serial.print(button); Serial.print("\n");
     switch (button) {
         case 11:  setPWMs( 0, 0, 0, 0 ); break;
-        case 12:  setPWMs( 1, 1, 1, 1 ); break;
-        case 13:  setPWMs( 50, 50, 50, 50 ); break;
+        case 12:  { Savegame s = load(0); 
+                    print_rgbw( s.red, s.green, s.blue, s.white, "Restore state:");
+                    setPWMs(s.red, s.green, s.blue, s.white); 
+                    break; }
+        case 13:  { Savegame s = {get_red(), get_green(), get_blue(), get_white() };
+                    print_rgbw( s.red, s.green, s.blue, s.white, "Save state:");
+                    save( 0, s ); break; }
         case 21:  set_red_fact( 1./ir_fact ); break;
         case 22:  set_red_fact( ir_fact ); break; 
         case 31:  set_green_fact( 1./ir_fact ); break;
