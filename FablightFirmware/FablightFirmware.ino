@@ -1,4 +1,10 @@
 
+//-------------------------------------------------------------------------
+
+#define FABLIGHT_ID  "FabLight0-proto"  // id (name) of this device
+
+//-------------------------------------------------------------------------
+
 #include <SoftwareSerial.h>
 #include <EEPROM.h> // needs to be included here to be accessible
 
@@ -27,7 +33,112 @@ void setup() {
 void loop() {
     handle_bluetooth();
     handle_ir();
+    handle_serial();
     // doAction();
+}
+
+
+//-------------------------------------------------------------------------
+// Serial receive handler
+void handle_serial()
+{
+    static char cmd[20] = {0};
+    static uint8_t  pc=0, err=0;
+    
+    while (Serial.available() > 0) {
+        char c = Serial.read();
+        if (c == '\r' || c == '\n') {  // Line ending terminates command
+            if (err) {  // Are we in arror state?
+                err = 0; pc = 0;
+                continue;
+            } else {  // err != 0
+                if (pc == 0)  // Ignore empty line
+                    continue;  
+                cmd[pc] = 0;
+                eval_serial_cmd( strupr(cmd), pc );
+                pc = 0;
+                continue;
+            }
+        } else {  // Not a termchar        
+            cmd[pc++] = c;
+            if (pc >= sizeof(cmd)) { // Command buffer overflow
+                err = 1; pc = 0;
+                Serial.println("Error: Command buffer overflow");
+                continue;
+            }
+        }  
+    }  // end Serial.available
+}
+
+
+
+int8_t  eval_serial_cmd( const char* cmd, uint8_t len )
+{
+    uint16_t red=0, green=0, blue=0, white=0;
+    
+    if (!strncmp( cmd, "FABLIGHT?", 9 )) {
+        Serial.println("YESSIR!");
+    }
+    
+    else if (!strncmp( cmd, "ID?", 3 )) {
+        Serial.println(FABLIGHT_ID);
+    }
+    
+    else if (!strncmp( cmd, "R:", 2 )) {
+        if (len<4) { Serial.println("Error: malformed command"); return 1; }
+        red = hex_to_uint8(cmd+2)<<4;
+        set_red(red);
+        Serial.println("OK");        
+        Serial.print("Via serial: R"); Serial.println(red);
+    }
+    
+    else if (!strncmp( cmd, "G:", 2 )) {
+        if (len<4) { Serial.println("Error: malformed command"); return 1; }
+        green = hex_to_uint8(cmd+2)<<4;
+        set_green(green);
+        Serial.println("OK");        
+        Serial.print("Via serial: G"); Serial.println(green);
+    }
+
+    else if (!strncmp( cmd, "B:", 2 )) {
+        if (len<4) { Serial.println("Error: malformed command"); return 1; }
+        blue = hex_to_uint8(cmd+2)<<4;
+        set_blue(blue);
+        Serial.println("OK");        
+        Serial.print("Via serial: B"); Serial.println(blue);
+    }
+    
+    else if (!strncmp( cmd, "W:", 2 )) {
+        if (len<4) { Serial.println("Error: malformed command"); return 1; }
+        white = hex_to_uint8(cmd+2)<<4;
+        set_white(white);
+        Serial.println("OK");        
+        Serial.print("Via serial: W"); Serial.println(white);
+    }
+
+    else if (!strncmp( cmd, "RGBW:", 5 )) {
+        if (len<13) { Serial.println("Error: malformed command");  return 1; }
+        red = hex_to_uint8(cmd+5)<<4;
+        green = hex_to_uint8(cmd+7)<<4;
+        blue = hex_to_uint8(cmd+9)<<4;
+        white = hex_to_uint8(cmd+11)<<4;
+        setPWMs(red, green, blue, white);
+        Serial.println("OK");        
+        print_rgbw(red, green, blue, white, "Via serial: ");
+    }
+    
+    else if (!strncmp( cmd, "OFF", 3 )) {
+        setPWMs(0,0,0,0);
+        Serial.println("OK");
+        print_rgbw(red, green, blue, white, "Via serial: ");
+    }
+        
+    else {
+        Serial.println("Error: unknown command");
+        return 1; 
+    }
+    
+    return 0;
 }
 
 
@@ -41,16 +152,12 @@ void handle_bluetooth()
 
     while(bluetooth.available()) {
         char c = bluetooth.read();
-        //Serial.write(c);
+        // Serial.write(c); // DEBUG
         if(c == '\r' || c == '\n') { // line ending terminates command 
             if (!err && index==12) {
-                setPWMs(white*16, red*16, green*16, blue*16);
-                bluetooth.print('.');        
-                Serial.print("Via bluetooth: ");
-                Serial.print("R:"); Serial.print(red, HEX); Serial.print(" G:"); Serial.print(green, HEX);
-                Serial.print(" B:"); Serial.print(blue, HEX); Serial.print(" W:"); Serial.print(white, HEX);
-                Serial.print(" F:"); Serial.print(fade, HEX); Serial.print('\n');
-            
+                setPWMs(red*16, green*16, blue*16, white*16);
+                bluetooth.print('.');
+                print_rgbw(red*16, green*16, blue*16, white*16, "Via bluetooth: ");
             }
             index = 0;
             err = 0;
