@@ -1,3 +1,4 @@
+import sys
 from numpy import *
 from colorsys import *
 
@@ -16,7 +17,7 @@ class Color_Display:
     patch_size = 64, 64
     patch_img = None
     rgb = 0,0,0  # Stored rgb components in range [0..255] 
-    var = {}
+    var = ()
 
     def __init__(self, parent):
         self.parent = parent
@@ -48,12 +49,29 @@ class Color_Display:
         self.var_boxes = [tk.Label(self.var_frame,
                      textvariable=self.var_vals[i]) for i in range(3)]
 
+        # Layout
+        self.place()
+
         # Initial color
         rgb, var = color.get()
         self.set( rgb, var )
 
         # Register for automatic update
         color.subscribe(self.on_color_change)
+
+    def place(self, **args):
+        """Place widgets on grid. Call with grid parameters for enclosing frame"""
+        self.frame.grid(args)
+        self.patch.grid(column=0, row=0, padx=4, pady=4)
+        self.rgb_frame.grid(column=0, row=1, padx=(8,4), pady=2, sticky=tk.W)
+        self.sep.grid(column=0, row=2, sticky=tk.E+tk.W)
+        self.var_frame.grid(column=0, row=3, padx=(8,4), pady=2, sticky=tk.W)        
+        self.r_label.grid(column=0, row=0, sticky=tk.W); self.r_box.grid(column=1, row=0, sticky=tk.W)
+        self.g_label.grid(column=0, row=1, sticky=tk.W); self.g_box.grid(column=1, row=1, sticky=tk.W)
+        self.b_label.grid(column=0, row=2, sticky=tk.W); self.b_box.grid(column=1, row=2, sticky=tk.W)
+        for i in range(3):
+            self.var_labels[i].grid(column=0, row=i, sticky=tk.W)
+            self.var_boxes[i].grid(column=1, row=i, sticky=tk.W)
 
     def on_color_change(self):
         """Registered as callback function to global color broadcast """
@@ -70,20 +88,18 @@ class Color_Display:
         self.b_val.set( str(int(self.rgb[2])) )
         self.create_patch_img()
 
-    def set_var(self, var={}):
-        """Set up to 3 arbitrary color space parameters to display. Pass as ditionary {name:value, ...}"""
-        if var==None: var={}
-        self.var = var
-        labels, values = ['','',''],['','','']
-        keys = var.keys()
+    def set_var(self, var=()):
+        """Set up to 3 arbitrary color space parameters to display. Pass as tuple ( (name,value) , ...)"""
+        if var==None: var=()
         try:
-            for i in range(3):
-               labels[i] = keys[i]; values[i] = var[keys[i]]
-        except: pass 
+            for v in var[:3]: v[0], v[1]
+        except: '### Color_Display: Error: var must be a tuple ( (name, value), ... ) '
         for i in range(3):
-            if labels[i]: labels[i] += ':'
-            self.var_labels[i].config( text=str(labels[i]) )
-            self.var_vals[i].set( str(values[i])[:6] )
+            self.var_labels[i].config( text='' )
+            self.var_vals[i].set( '' )
+        for v in var[:3]:
+            self.var_labels[i].config( text=str(v[0]) )
+            self.var_vals[i].set( str(v[1])[:6] )
 
     def set(self, rgb=None, var={}):
         self.set_rgb(rgb)
@@ -97,26 +113,147 @@ class Color_Display:
         else:
             self.patch_img.paste( patch_img ) # PASTE! Do not replace. Image frame remembers original object
 
-    def place(self, **args):
-        """Place widgets on grid. Call with grid parameters for enclosing frame"""
-        self.frame.grid(args)
-        self.patch.grid(column=0, row=0, padx=4, pady=4)
-        self.rgb_frame.grid(column=0, row=1, padx=(8,4), pady=2, sticky=tk.W)
-        self.sep.grid(column=0, row=2, sticky=tk.E+tk.W)
-        self.var_frame.grid(column=0, row=3, padx=(8,4), pady=2, sticky=tk.W)        
-        self.r_label.grid(column=0, row=0, sticky=tk.W); self.r_box.grid(column=1, row=0, sticky=tk.W)
-        self.g_label.grid(column=0, row=1, sticky=tk.W); self.g_box.grid(column=1, row=1, sticky=tk.W)
-        self.b_label.grid(column=0, row=2, sticky=tk.W); self.b_box.grid(column=1, row=2, sticky=tk.W)
-        for i in range(3):
-            self.var_labels[i].grid(column=0, row=i, sticky=tk.W)
-            self.var_boxes[i].grid(column=1, row=i, sticky=tk.W)
-
 
 #-----------------------------------------------------------------------------------------
 # HSV picker
-# Two widgets: sat-val plane, vertical hue scale 
+# Three horizontal scales for Hue, Sat, Val
 
 class HSV_Picker:
+    panel_size = 290, 32
+    hue, sat, val = 0, 0, 0
+    
+    hue_img, sat_img, val_img = None, None, None
+
+    def __init__(self,parent):
+        self.parent = parent
+        self.frame = tk.Frame(self.parent)
+
+        # Get initial color
+        r,g,b = color.get_rgb()
+        self.hue, self.sat, self.val = rgb_to_hsv(r,g,b)
+
+        # Create initial images
+        self.create_img()
+
+        # setup frames
+        self.hue_panel = tk.Label(self.frame, image=self.hue_img, bd=0,
+                                  width=self.panel_size[0], height=self.panel_size[1] )
+        self.sat_panel = tk.Label(self.frame, image=self.sat_img, bd=0,
+                                  width=self.panel_size[0], height=self.panel_size[1] )
+        self.val_panel = tk.Label(self.frame, image=self.val_img, bd=0,
+                                  width=self.panel_size[0], height=self.panel_size[1] )
+        
+        # bind event handlers
+        self.hue_panel.bind('<Button-1>', self.on_hue_click)
+        self.hue_panel.bind('<B1-Motion>', self.on_hue_click)
+        self.sat_panel.bind('<Button-1>', self.on_sat_click)
+        self.sat_panel.bind('<B1-Motion>', self.on_sat_click)
+        self.val_panel.bind('<Button-1>', self.on_val_click)
+        self.val_panel.bind('<B1-Motion>', self.on_val_click)
+        self.parent.bind('<<NotebookTabChanged>>', self.on_tab_changed)
+
+        self.place()
+        
+    def place(self,**args): # place frames on grid
+        self.frame.grid(args)
+        self.hue_panel.grid(column=0, row=0, padx=8, pady=8, sticky=tk.W+tk.E)
+        self.sat_panel.grid(column=0, row=1, padx=8, pady=8, sticky=tk.W+tk.E)
+        self.val_panel.grid(column=0, row=2, padx=8, pady=8, sticky=tk.W+tk.E)
+
+    def create_img(self):
+        self.create_hue_img()
+        self.create_sat_img()
+        self.create_val_img()
+
+    def create_hue_img(self):
+        w,h = self.panel_size
+        if (self.hue_img==None): # First call, create color scale
+            hue_scale = empty((h,w,3), dtype=uint8)
+            hue_scale[:] = 255*array([hsv_to_rgb(x,0.9,0.9) for x in 1.*arange(0,w)/w])
+            self.hue_scale = hue_scale
+        # Mark current value
+        hue_scale = self.hue_scale.copy()
+        hue_scale[:,self.hue*(w-1),:] = 0
+        # Create image object for gui
+        hue_img = PIL.Image.frombuffer('RGB', (w,h), hue_scale, 'raw', 'RGB', 0, 1)
+        if (self.hue_img==None):
+            self.hue_img = PIL.ImageTk.PhotoImage( hue_img )
+        else:
+            self.hue_img.paste( hue_img ) # PASTE! Do not replace. Image frame remembers original object
+
+    def create_sat_img(self):
+        w,h = self.panel_size
+        sat_scale = empty((h,w,3), dtype=uint8)
+        sat_scale[:] = 255*array([hsv_to_rgb(self.hue, x, 1) for x in 1.*arange(0,w)/w])
+        #Mark current value
+        sat_scale[:,self.sat*(w-1),:] = 0
+        # Create image object for gui
+        sat_img = PIL.Image.frombuffer('RGB', (w,h), sat_scale, 'raw', 'RGB', 0, 1)
+        if (self.sat_img==None):
+            self.sat_img = PIL.ImageTk.PhotoImage( sat_img )
+        else:
+            self.sat_img.paste( sat_img ) # PASTE! Do not replace. Image frame remembers original object
+
+
+    def create_val_img(self):
+        w,h = self.panel_size
+        val_scale = empty((h,w,3), dtype=uint8)
+        val_scale[:] = 255*array([hsv_to_rgb(self.hue, self.sat, x) for x in 1.*arange(0,w)/w])
+        # Mark current value
+        val_scale[:,self.val*(w-1),:] = 255 if self.val<0.5 else 0
+        # Create image object for gui
+        val_img = PIL.Image.frombuffer('RGB', (w,h), val_scale, 'raw', 'RGB', 0, 1)
+        if (self.val_img==None):
+            self.val_img = PIL.ImageTk.PhotoImage( val_img )
+        else:
+            self.val_img.paste( val_img ) # PASTE! Do not replace. Image frame remembers original object
+
+
+    def on_hue_click(self, event):
+        x = clip( event.x, 0, self.panel_size[0] )
+        print 'x=', x
+        self.hue = float(x)/self.panel_size[0]
+        print "hue=", self.hue
+        self.create_hue_img()        
+        self.create_sat_img()
+        self.create_val_img()
+        self.broadcast_change()
+
+    def on_sat_click(self, event):
+        x = clip( event.x, 0, self.panel_size[0] )
+        print 'x=', x
+        self.sat = float(x)/self.panel_size[0]
+        print "sat=", self.sat
+        self.create_sat_img()
+        self.create_val_img()
+        self.broadcast_change()
+
+    def on_val_click(self, event):
+        x = clip( event.x, 0, self.panel_size[0] )
+        print 'x=', x
+        self.val = float(x)/self.panel_size[0]
+        print "val=", self.val
+        self.create_sat_img()
+        self.create_val_img()
+        self.broadcast_change()
+
+    def on_tab_changed(self, event):
+        print 'HSV tab'
+        r,g,b = color.get_rgb()
+        self.hue, self.sat, self.val = rgb_to_hsv(r,g,b)
+        self.create_img()
+        self.broadcast_change()
+
+    def broadcast_change(self):
+        rgb = hsv_to_rgb(self.hue, self.sat, self.val)
+        var = ( ('H',self.hue), ('S',self.sat), ('V',self.val) )
+        color.set( rgb, var )
+
+#-----------------------------------------------------------------------------------------
+# H(SV) picker
+# Two widgets: sat-val plane, vertical hue scale 
+
+class H_SV_Picker:
     hue_panel_size = 32, 256
     sv_panel_size = 256, 256  
     hue, sat, val = 0, 0, 0
@@ -213,7 +350,7 @@ class HSV_Picker:
         self.broadcast_change()
 
     def on_tab_changed(self, event):
-        print 'HSV tab'
+        print 'H(SV) tab'
         rgb = color.get_rgb()
         self.hue, self.sat, self.val = rgb_to_hsv(*rgb)
         self.create_img()
@@ -221,7 +358,7 @@ class HSV_Picker:
         
     def broadcast_change(self):
         rgb = hsv_to_rgb(self.hue, self.sat, self.val)
-        var = {'H':self.hue, 'S':self.sat, 'V':self.val }
+        var = ( ('H',self.hue), ('S',self.sat), ('V',self.val) )
         color.set( rgb, var )
 
 #-----------------------------------------------------------------------------------------
@@ -241,7 +378,7 @@ class RGB_Picker:
         self.rgb = color.get_rgb()
 
         # Create initial images
-        self.create_rgb_img()
+        self.create_img()
         
         # setup frame
         self.r_panel = tk.Label(self.frame, image=self.r_img, bd=0,
@@ -268,7 +405,7 @@ class RGB_Picker:
         self.g_panel.grid(column=0, row=1, padx=8, pady=8, sticky=tk.W+tk.E)
         self.b_panel.grid(column=0, row=2, padx=8, pady=8, sticky=tk.W+tk.E)
 
-    def create_rgb_img(self):
+    def create_img(self):
         self.create_r_img()
         self.create_g_img()
         self.create_b_img()
@@ -345,12 +482,12 @@ class RGB_Picker:
     def on_tab_changed(self, event):
         print 'RGB tab'
         self.r, self.g, self.b = color.get_rgb()
-        self.create_rgb_img()
+        self.create_img()
         self.broadcast_change()
 
     def broadcast_change(self):
         rgb = self.r, self.g, self.b
-        var = {'R':self.r, 'G':self.g, 'B':self.b}
+        var = ( ('R',self.r), ('G',self.g), ('B',self.b) )
         color.set( rgb, var )
 
 #-------------------------------------------------------------------------------------------------
@@ -372,7 +509,6 @@ class Color_Broadcast:
         """Set new color. rgb components are required, optionally, model
         specific components can be passed as dictionary {name:value, } in var."""
         self.rgb = float(rgb[0]), float(rgb[1]), float(rgb[2])
-        if not isinstance(var, dict): raise ValueError('<var> is not a dictionary')
         self.var = var
         for func in self.callbacks: func()
     def get(self):
@@ -397,11 +533,13 @@ color = Color_Broadcast()
 # Widgets:
 
 # Main dialog
-root = tk.Tk()
-##root = tk.Toplevel() # Use in IDE
+if 'pywin' in sys.modules:
+    root = tk.evel() # Use in IDE
+else:
+    root = tk.Tk()
 root.title("Fablight Control")
 root.resizable(width=0, height=0)
-root.geometry('+10+10') # Toplevel window position
+root.geometry('+10+10') #Toplevel window position
 
 
 # Frame: Select device 
@@ -430,13 +568,18 @@ class MyNotebook(ttk.Notebook):
         selected_tab.event_generate('<<NotebookTabChanged>>',data=1234) 
 
 tabs = MyNotebook(root)
+
 tab_rgb = ttk.Frame(tabs)
 tabs.add(tab_rgb, text="RGB")
-##tabs.add(tab_hsv1, text="HSV")
-tab_hsv = ttk.Frame(tabs)
-tabs.add(tab_hsv, text="H(SV)")
 rgb_picker = RGB_Picker(tab_rgb)
+
+tab_hsv = ttk.Frame(tabs)
+tabs.add(tab_hsv, text="HSV")
 hsv_picker = HSV_Picker(tab_hsv)
+
+tab_hsv2 = ttk.Frame(tabs)
+tabs.add(tab_hsv2, text="H(SV)")
+hsv2_picker = H_SV_Picker(tab_hsv2)
 
 color_display = Color_Display(root)
 
