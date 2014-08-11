@@ -534,12 +534,14 @@ color = Color_Broadcast()
 
 # Main dialog
 if 'pywin' in sys.modules:
-    root = tk.evel() # Use in IDE
+    root = tk.Toplevel() # Use in IDE
 else:
     root = tk.Tk()
 root.title("Fablight Control")
 root.resizable(width=0, height=0)
 root.geometry('+10+10') #Toplevel window position
+icon = PIL.ImageTk.PhotoImage( PIL.Image.open('icon.gif') )
+root.tk.call('wm', 'iconphoto', root._w, icon)
 
 
 # Frame: Select device 
