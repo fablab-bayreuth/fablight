@@ -156,9 +156,15 @@ class HSV_Picker:
         
     def place(self,**args): # place frames on grid
         self.frame.grid(args)
-        self.hue_panel.grid(column=0, row=0, padx=8, pady=8, sticky=tk.W+tk.E)
-        self.sat_panel.grid(column=0, row=1, padx=8, pady=8, sticky=tk.W+tk.E)
-        self.val_panel.grid(column=0, row=2, padx=8, pady=8, sticky=tk.W+tk.E)
+        tk.Label(self.frame, text='Hue').grid(column=0, row=0, padx=8, pady=(6,0), sticky=tk.W)
+        self.hue_panel.grid(column=0, row=1, padx=8, pady=(0,6), sticky=tk.W+tk.E)
+        tk.Label(self.frame, text='Saturation').grid(column=0, row=2, padx=8, pady=0, sticky=tk.W)
+        self.sat_panel.grid(column=0, row=3, padx=8, pady=(0,6), sticky=tk.W+tk.E)
+        tk.Label(self.frame, text='Value (Brightness)').grid(column=0, row=4, padx=8, pady=0, sticky=tk.W)
+        self.val_panel.grid(column=0, row=5, padx=8, pady=(0,6), sticky=tk.W+tk.E)
+        ##self.hue_panel.grid(column=0, row=0, padx=8, pady=8, sticky=tk.W+tk.E)
+        ##self.sat_panel.grid(column=0, row=1, padx=8, pady=8, sticky=tk.W+tk.E)
+        ##self.val_panel.grid(column=0, row=2, padx=8, pady=8, sticky=tk.W+tk.E)
 
     def create_img(self):
         self.create_hue_img()
@@ -289,8 +295,10 @@ class H_SV_Picker:
 
     def place(self, **args): # place frames on grid
         self.frame.grid(args)
-        self.sv_panel.grid(column=0, row=0, padx=4, pady=4, sticky=tk.W+tk.E+tk.N+tk.S)
-        self.hue_panel.grid(column=1, row=0, padx=4, pady=4, sticky=tk.N+tk.S)
+        tk.Label(self.frame, text='Saturation / Value (Brightness)').grid(column=0, row=0, padx=(8,4), pady=(4,0), sticky=tk.W)
+        self.sv_panel.grid(column=0, row=1, padx=(8,4), pady=(2,8), sticky=tk.W+tk.E+tk.N+tk.S)
+        tk.Label(self.frame, text='Hue').grid(column=1, row=0, padx=(4,8), pady=(4,0))
+        self.hue_panel.grid(column=1, row=1, padx=(4,8), pady=(2,8), sticky=tk.N+tk.S)
 
     def create_hue_img(self):
         if (self.hue_img==None): # First call, create static hue-scale
@@ -401,9 +409,15 @@ class RGB_Picker:
         
     def place(self,**args): # place frames on grid
         self.frame.grid(args)
-        self.r_panel.grid(column=0, row=0, padx=8, pady=8, sticky=tk.W+tk.E)
-        self.g_panel.grid(column=0, row=1, padx=8, pady=8, sticky=tk.W+tk.E)
-        self.b_panel.grid(column=0, row=2, padx=8, pady=8, sticky=tk.W+tk.E)
+        tk.Label(self.frame, text='Red').grid(column=0, row=0, padx=8, pady=(6,0), sticky=tk.W)
+        self.r_panel.grid(column=0, row=1, padx=8, pady=(0,6), sticky=tk.W+tk.E)
+        tk.Label(self.frame, text='Green').grid(column=0, row=2, padx=8, pady=0, sticky=tk.W)
+        self.g_panel.grid(column=0, row=3, padx=8, pady=(0,6), sticky=tk.W+tk.E)
+        tk.Label(self.frame, text='Blue').grid(column=0, row=4, padx=8, pady=0, sticky=tk.W)
+        self.b_panel.grid(column=0, row=5, padx=8, pady=(0,6), sticky=tk.W+tk.E)
+        ##self.r_panel.grid(column=0, row=0, padx=8, pady=8, sticky=tk.W+tk.E)
+        ##self.g_panel.grid(column=0, row=1, padx=8, pady=8, sticky=tk.W+tk.E)
+        ##self.b_panel.grid(column=0, row=2, padx=8, pady=8, sticky=tk.W+tk.E)
 
     def create_img(self):
         self.create_r_img()
