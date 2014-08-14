@@ -20,9 +20,16 @@ class FablightCom(object):
         if baudrate==None: baudrate=38400
         self._port = serial.Serial(portname, baudrate=baudrate,
                                    timeout=1)
-        time.sleep(2)  # :XXX: Firmware resets upon opening port   
+        # Note: By default, the Arduino resets when opening the Com port, needs
+        #   1-2 seconds to boot. The firmware sends a greeting when up and running.
+        self._port.timeout = 0.05
+        if not self.is_fablight():
+            # May be busy booting, wait for greeting message
+            self._port.timeout = 3
+            self.readline()
         self._port.flushInput()
         if not self.is_fablight():
+            # If still not responding, something is wrong
             self._port.close()
             print "Error: Did not recognize a Fablight at port %s" % portname
         self.portname = portname
@@ -47,7 +54,7 @@ class FablightCom(object):
             data += '\r'
         self._port.write(data)
 
-    def read(self):
+    def readline(self):
         if self._port==None:
             print 'Error: serial port not opened.'
             return
@@ -55,7 +62,7 @@ class FablightCom(object):
 
     def ask(self, cmd):
         self.write(cmd)
-        return self.read()
+        return self.readline()
 
     def off(self):
         self.write('off')
