@@ -93,13 +93,15 @@ class Color_Display:
         if var==None: var=()
         try:
             for v in var[:3]: v[0], v[1]
-        except: '### Color_Display: Error: var must be a tuple ( (name, value), ... ) '
+        except:
+            print '### Color_Display: Error: var must be a tuple ( (name, value), ... ) '
+            v = ()
         for i in range(3):
             self.var_labels[i].config( text='' )
             self.var_vals[i].set( '' )
-        for v in var[:3]:
-            self.var_labels[i].config( text=str(v[0]) )
-            self.var_vals[i].set( str(v[1])[:6] )
+        for i in range(min(3,len(var))):
+            self.var_labels[i].config( text=str(var[i][0])+':' )
+            self.var_vals[i].set( str(var[i][1])[:6] )
 
     def set(self, rgb=None, var={}):
         self.set_rgb(rgb)
