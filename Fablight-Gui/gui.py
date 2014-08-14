@@ -636,11 +636,16 @@ def on_button_open():
             print 'Specify a com port to connect to!'
             return
         print "Open port:", port
-        fabcom.open(port)
-        if fabcom.is_open():
-            button_open.config(text="Close")
-        else:
-            print "Error opening port."
+        # Note: Put to a thread to prevent GUI from freezing during open
+        def open_device(port):
+            fabcom.open(port)
+            if fabcom.is_open():
+                button_open.config(text="Close")
+                id = fabcom.get_id()
+                print "Connected to:", id
+            else:
+                print "Error opening port."
+        threading.Thread( target=open_device, args=(port,) ).start()
 
 def on_button_send():
     send_color_to_device()
