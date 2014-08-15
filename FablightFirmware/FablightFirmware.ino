@@ -26,7 +26,7 @@ void setup() {
     Serial.begin(38400);
     bluetooth.begin(BT_BAUD);
     setPWMs(1, 1, 1, 1);
-    Serial.println("Yabadabadoooo!");
+    Serial.println("Yabadabadoo!");
 }
 
 
