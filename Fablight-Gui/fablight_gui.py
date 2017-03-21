@@ -17,9 +17,9 @@ import hsv_picker
 reload(hsv_picker)
 from hsv_picker import HSV_Picker, H_SV_Picker, HS_V_Picker
 
-##import hcl_picker
-##reload(hcl_picker)
-##from hcl_picker import H_CL_Picker
+import hcl_picker
+reload(hcl_picker)
+from hcl_picker import H_CL_Picker
 
 import colorbc
 reload(colorbc)
@@ -100,9 +100,9 @@ tabs.add(tab_hsv3, text="(HS)V")
 hsv3_picker = HS_V_Picker(tab_hsv3, color)
 
 ### H(CL)
-##tab_hcl = ttk.Frame(tabs)
-##tabs.add(tab_hcl, text="H(CL)")
-##hcl_picker = H_CL_Picker(tab_hcl, color)
+tab_hcl = ttk.Frame(tabs)
+tabs.add(tab_hcl, text="H(CL)")
+hcl_picker = H_CL_Picker(tab_hcl, color)
 
 #-------------------------------------------------------------------------------------------------
 # Configure layout

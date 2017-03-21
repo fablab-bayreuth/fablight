@@ -71,7 +71,7 @@ class HSV_Picker:
             self.hue_scale = hue_scale
         # Mark current value
         hue_scale = self.hue_scale.copy()
-        hue_scale[:,self.hue*(w-1),:] = 0
+        hue_scale[:, int(self.hue*(w-1)), :] = 0
         # Create image object for gui
         hue_img = PIL.Image.frombuffer('RGB', (w,h), hue_scale, 'raw', 'RGB', 0, 1)
         if (self.hue_img==None):
@@ -84,7 +84,7 @@ class HSV_Picker:
         sat_scale = empty((h,w,3), dtype=uint8)
         sat_scale[:] = 255*array([hsv_to_rgb(self.hue, x, 1) for x in 1.*arange(0,w)/w])
         #Mark current value
-        sat_scale[:,self.sat*(w-1),:] = 0
+        sat_scale[:, int(self.sat*(w-1)), :] = 0
         # Create image object for gui
         sat_img = PIL.Image.frombuffer('RGB', (w,h), sat_scale, 'raw', 'RGB', 0, 1)
         if (self.sat_img==None):
@@ -98,7 +98,7 @@ class HSV_Picker:
         val_scale = empty((h,w,3), dtype=uint8)
         val_scale[:] = 255*array([hsv_to_rgb(self.hue, self.sat, x) for x in 1.*arange(0,w)/w])
         # Mark current value
-        val_scale[:,self.val*(w-1),:] = 255 if self.val<0.5 else 0
+        val_scale[:, int(self.val*(w-1)), :] = 255 if self.val<0.5 else 0
         # Create image object for gui
         val_img = PIL.Image.frombuffer('RGB', (w,h), val_scale, 'raw', 'RGB', 0, 1)
         if (self.val_img==None):
@@ -109,7 +109,7 @@ class HSV_Picker:
 
     def on_hue_click(self, event):
         x = clip( event.x, 0, self.panel_size[0] )
-        ##print 'x=', x
+        print 'x=', x
         self.hue = float(x)/self.panel_size[0]
         print "hue=", self.hue
         self.create_hue_img()        
@@ -119,7 +119,7 @@ class HSV_Picker:
 
     def on_sat_click(self, event):
         x = clip( event.x, 0, self.panel_size[0] )
-        ##print 'x=', x
+        print 'x=', x
         self.sat = float(x)/self.panel_size[0]
         print "sat=", self.sat
         self.create_sat_img()
@@ -128,7 +128,7 @@ class HSV_Picker:
 
     def on_val_click(self, event):
         x = clip( event.x, 0, self.panel_size[0] )
-        ##print 'x=', x
+        print 'x=', x
         self.val = float(x)/self.panel_size[0]
         print "val=", self.val
         self.create_sat_img()
@@ -204,7 +204,7 @@ class H_SV_Picker:
             hue_scale = 255*array([hsv_to_rgb(1.-y,0.9,0.9) for y in 1.*arange(0,h)/h])
             self.hue_scale = hue_scale.astype(uint8).copy() # Make sure to keep a copy!
         hue_scale = self.hue_scale.copy()
-        hue_scale[(1-self.hue)*(h-1),:]=0  # Mark current hue value
+        hue_scale[ int((1-self.hue)*(h-1)), :]=0  # Mark current hue value
         hue_img = PIL.Image.frombuffer('RGB', (1,h), hue_scale, 'raw', 'RGB', 0, 1)
         hue_img = hue_img.resize( self.hue_panel_size )
         if (self.hue_img==None):
@@ -222,7 +222,7 @@ class H_SV_Picker:
         ##for vi in range(256): fd1[:,vi] = fd1[:,256] *vi/256.
         sv = transpose( tile(sat[:,newaxis], (256,1) ), (1,0,2) )* repeat(arange(256)[::-1],256*3).reshape(256,256,3)/256.
         # Mark click position
-        s,v = self.sat*255, 255-self.val*255
+        s,v = int(self.sat*255), int(255-self.val*255)
         s0=max(s-10,0); s1=min(s+10,255); v0=max(v-10,0); v1=min(v+10,255)
         c = 1. if v>100 else 0. 
         sv[v,s0:s1,:] = c; sv[v0:v1,s,:] = c
@@ -240,7 +240,7 @@ class H_SV_Picker:
 
     def on_hue_click(self, event):
         y = clip( event.y, 0, self.hue_panel_size[1] )
-        ##print 'y=', y
+        print 'y=', y
         self.hue = 1.-float(y)/self.hue_panel_size[1]
         print "hue=", self.hue
         self.create_hue_img()
@@ -326,9 +326,11 @@ class HS_V_Picker:
             val_scale = repeat(1.0*arange(h)[::-1]/h, w*3).reshape((h,w,3))
             self.val_scale = (255*val_scale).astype(uint8)
         val_scale = self.val_scale.copy()
-        val_scale *= hsv_to_rgb(self.hue, self.sat, 0.9)            
+        rgb = hsv_to_rgb(self.hue, self.sat, 0.9)
+        #val_scale *= rgb
+        val_scale = (val_scale.astype(float) * rgb).astype(uint8)
         # Mark current value
-        val_scale[(1-self.val)*(h-1),:,:] = 255 if self.val<0.5 else 0
+        val_scale[ int((1-self.val)*(h-1)), :, :] = 255 if self.val<0.5 else 0
         # Create image object for gui
         val_img = PIL.Image.frombuffer('RGB', (w,h), val_scale, 'raw', 'RGB', 0, 1)
         if (self.val_img==None):
@@ -346,7 +348,7 @@ class HS_V_Picker:
             self.hs_scale = (255*hs_scale).astype(uint8)
         hs_scale = self.hs_scale.copy()
         # Mark click position
-        x,y = self.hue*255, 255-self.sat*255
+        x,y = int(self.hue*255), int(255-self.sat*255)
         x0=max(x-10,0); x1=min(x+10,255); y0=max(y-10,0); y1=min(y+10,255)
         c = 1. if y>100 else 0. 
         hs_scale[y,x0:x1,:] = c; hs_scale[y0:y1,x,:] = c
@@ -363,7 +365,7 @@ class HS_V_Picker:
 
     def on_val_click(self, event):
         y = clip( event.y, 0, self.val_panel_size[1] )
-        ##print 'y=', y
+        print 'y=', y
         self.val = 1.-float(y)/self.val_panel_size[1]
         print "val=", self.val
         self.create_val_img()

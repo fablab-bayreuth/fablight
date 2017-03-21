@@ -27,15 +27,18 @@ class FablightCom(object):
             # May be busy booting, wait for greeting message
             self._port.timeout = 3
             self.readline()
-        self._port.flushInput()
-        if not self.is_fablight():
-            # If still not responding, something is wrong
-            self._port.close()
-            print "Error: Did not recognize a Fablight at port %s" % portname
+            self._port.flushInput()
+            if not self.is_fablight():
+                # If still not responding, something is wrong
+                self._port.close()
+                print "Error: Did not recognize a Fablight at port %s" % portname
+                return
         self.portname = portname
 
     def is_open(self):
-        return self._port != None
+        if self._port != None:
+            return self._port.isOpen()
+        else: return False
 
     def close(self):
         self._port.close()

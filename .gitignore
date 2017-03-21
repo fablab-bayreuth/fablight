@@ -24,3 +24,6 @@
 
 # Qt user stuff
 *.user
+
+# Python compiled bytecode
+*.pyc

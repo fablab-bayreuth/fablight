@@ -69,7 +69,7 @@ class RGB_Picker:
             self.r_scale[:,:,0] = 255./w*arange(w)
         # Mark current value
         r_scale = self.r_scale.copy()
-        r_scale[:,self.r*(w-1),:] = 255
+        r_scale[:, int(self.r*(w-1)), :] = 255
         # Create image object for gui
         r_img = PIL.Image.frombuffer('RGB', (w,h), r_scale, 'raw', 'RGB', 0, 1)
         if (self.r_img==None):
@@ -84,7 +84,7 @@ class RGB_Picker:
             self.g_scale[:,:,1] = 255./w*arange(w)
         # Mark current values
         g_scale = self.g_scale.copy()
-        g_scale[:,self.g*(w-1),:] = 255
+        g_scale[:, int(self.g*(w-1)), :] = 255
         # Create image objects for gui
         g_img = PIL.Image.frombuffer('RGB', (w,h), g_scale, 'raw', 'RGB', 0, 1)
         if (self.g_img==None):
@@ -99,7 +99,7 @@ class RGB_Picker:
             self.b_scale[:,:,2] = 255./w*arange(w)
         # Mark current values
         b_scale = self.b_scale.copy()
-        b_scale[:,self.b*(w-1),:] = 255
+        b_scale[:, int(self.b*(w-1)), :] = 255
         # Cerate image objects for gui
         b_img = PIL.Image.frombuffer('RGB', (w,h), b_scale, 'raw', 'RGB', 0, 1)
         if (self.b_img==None):
@@ -109,7 +109,7 @@ class RGB_Picker:
 
     def on_r_click(self, event):
         x = clip( event.x, 0, self.rgb_panel_size[0] )
-        ##print 'x=', x
+        print 'x=', x
         self.r = float(x)/self.rgb_panel_size[0]
         print "r=", self.r
         self.create_r_img()
@@ -117,7 +117,7 @@ class RGB_Picker:
 
     def on_g_click(self, event):
         x = clip( event.x, 0, self.rgb_panel_size[0] )
-        ##print 'x=', x
+        print 'x=', x
         self.g = float(x)/self.rgb_panel_size[0]
         print "g=", self.g
         self.create_g_img()
@@ -125,7 +125,7 @@ class RGB_Picker:
 
     def on_b_click(self, event):
         x = clip( event.x, 0, self.rgb_panel_size[0] )
-        ##print 'x=', x
+        print 'x=', x
         self.b = float(x)/self.rgb_panel_size[0]
         print "b=", self.b
         self.create_b_img()
